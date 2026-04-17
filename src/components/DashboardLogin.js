@@ -1,7 +1,25 @@
 import React, { useState, useEffect } from "react";
 import api from "../api";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "https://real-time-fintech-trading-engine-backend-5ao3.onrender.com";
+const FALLBACK_API_URL = "https://real-time-fintech-trading-engine-backend-5ao3.onrender.com";
+const resolveApiBaseUrl = () => {
+  const configured = String(process.env.REACT_APP_API_URL || "").trim();
+  if (!configured) {
+    return FALLBACK_API_URL;
+  }
+
+  if (typeof window !== "undefined") {
+    const isLocalApp = /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
+    const isLocalApi = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(configured);
+    if (!isLocalApp && isLocalApi) {
+      return FALLBACK_API_URL;
+    }
+  }
+
+  return configured;
+};
+
+const API_BASE_URL = resolveApiBaseUrl();
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
 const DashboardLogin = ({ onLoginSuccess }) => {
